@@ -1,0 +1,1034 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>MAJC — Hospitality AI Platform Demo</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=Instrument+Sans:wght@300;400;500&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #faf8f4;
+    --surface: #ffffff;
+    --surface2: #f5f2ec;
+    --border: #e8e2d9;
+    --border2: #d4ccbf;
+    --ink: #1a1610;
+    --ink2: #4a4238;
+    --muted: #9a9186;
+    --gold: #c9a84c;
+    --gold2: #a8853a;
+    --gold-light: #f5edda;
+    --teal: #2d6b5e;
+    --teal-light: #e8f2f0;
+    --red: #c94c4c;
+    --green: #4c9469;
+    --display: 'Syne', sans-serif;
+    --body: 'Instrument Sans', sans-serif;
+    --mono: 'JetBrains Mono', monospace;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  html { scroll-behavior:smooth; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--body);
+    min-height: 100vh;
+  }
+
+  /* LAYOUT */
+  .shell { display:flex; min-height:100vh; }
+
+  /* SIDEBAR */
+  .sidebar {
+    width: 240px; flex-shrink:0;
+    background: var(--ink);
+    position: fixed; top:0; left:0; bottom:0;
+    display:flex; flex-direction:column;
+    overflow:hidden;
+  }
+  .sidebar::before {
+    content:'';
+    position:absolute; top:0; right:0;
+    width:1px; height:100%;
+    background: linear-gradient(to bottom, transparent, rgba(201,168,76,0.4), transparent);
+  }
+
+  .brand {
+    padding: 28px 24px 24px;
+    border-bottom: 1px solid rgba(255,255,255,0.07);
+  }
+  .brand-name {
+    font-family: var(--display);
+    font-size: 24px; font-weight:800;
+    color: #fff; letter-spacing:-0.5px;
+    display:flex;align-items:center;gap:4px;
+  }
+  .brand-star { color: var(--gold); font-size:18px; }
+  .brand-sub {
+    font-family: var(--mono);
+    font-size: 9px; color: rgba(255,255,255,0.3);
+    letter-spacing: 3px; text-transform:uppercase;
+    margin-top: 4px;
+  }
+
+  .nav { padding: 20px 0; flex:1; }
+  .nav-section {
+    font-family: var(--mono); font-size: 8px;
+    color: rgba(255,255,255,0.2); letter-spacing:3px;
+    text-transform:uppercase; padding: 0 24px 8px;
+    margin-top: 12px;
+  }
+  .nav-item {
+    display:flex; align-items:center; gap:12px;
+    padding: 11px 24px;
+    font-size: 13px; color: rgba(255,255,255,0.45);
+    cursor:pointer; transition: all 0.15s;
+    position:relative;
+  }
+  .nav-item:hover { color: rgba(255,255,255,0.8); background:rgba(255,255,255,0.04); }
+  .nav-item.active {
+    color: var(--gold);
+    background: rgba(201,168,76,0.08);
+  }
+  .nav-item.active::before {
+    content:'';
+    position:absolute; left:0; top:0; bottom:0;
+    width:2px; background:var(--gold);
+  }
+  .nav-icon { font-size:14px; width:18px; text-align:center; }
+
+  .sidebar-bottom {
+    padding:20px 24px;
+    border-top: 1px solid rgba(255,255,255,0.07);
+  }
+  .stack-badge {
+    display:flex; flex-wrap:wrap; gap:4px;
+  }
+  .stk {
+    font-family:var(--mono); font-size:8px;
+    color:rgba(255,255,255,0.25);
+    border:1px solid rgba(255,255,255,0.08);
+    padding:3px 7px; border-radius:3px;
+  }
+
+  /* MAIN */
+  .main { margin-left:240px; flex:1; }
+
+  /* SECTIONS */
+  .section { display:none; animation: up 0.2s ease; }
+  .section.active { display:block; }
+  @keyframes up { from{opacity:0;transform:translateY(6px)} to{opacity:1;transform:none} }
+
+  /* TOP BAR */
+  .topbar {
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 20px 36px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position:sticky; top:0; z-index:10;
+  }
+  .topbar-left { display:flex;flex-direction:column;gap:2px; }
+  .topbar-title { font-family:var(--display);font-size:18px;font-weight:700; }
+  .topbar-sub { font-size:12px;color:var(--muted); }
+  .topbar-right { display:flex;gap:8px;align-items:center; }
+  .pill {
+    font-family:var(--mono);font-size:10px;
+    padding:5px 12px; border-radius:20px;
+    border:1px solid var(--border);
+    color:var(--ink2);
+    background:var(--surface2);
+  }
+  .pill.gold { color:var(--gold2);background:var(--gold-light);border-color:#e8d49a; }
+  .pill.teal { color:var(--teal);background:var(--teal-light);border-color:#c0ddd8; }
+
+  /* CONTENT BODY */
+  .body { padding: 28px 36px; }
+
+  /* CARDS */
+  .card {
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:22px 24px;
+  }
+  .card-label {
+    font-family:var(--mono);font-size:9px;
+    text-transform:uppercase;letter-spacing:2px;
+    color:var(--muted);margin-bottom:12px;
+  }
+  .card-title { font-family:var(--display);font-size:15px;font-weight:700;margin-bottom:6px; }
+
+  .grid-2 { display:grid;grid-template-columns:1fr 1fr;gap:14px; }
+  .grid-3 { display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px; }
+  .grid-4 { display:grid;grid-template-columns:repeat(4,1fr);gap:14px; }
+
+  /* STAT */
+  .stat {
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:10px;padding:20px 22px;
+  }
+  .stat-n {
+    font-family:var(--display);font-size:30px;font-weight:800;
+    color:var(--ink);line-height:1;margin-bottom:4px;
+  }
+  .stat-n.gold { color:var(--gold2); }
+  .stat-n.teal { color:var(--teal); }
+  .stat-l { font-size:12px;color:var(--muted);margin-bottom:2px; }
+  .stat-s { font-family:var(--mono);font-size:10px;color:var(--muted); }
+
+  /* JOB CARDS */
+  .job-card {
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:10px;padding:18px 20px;
+    cursor:pointer;transition:all 0.15s;
+    position:relative;overflow:hidden;
+  }
+  .job-card:hover { border-color:var(--border2);box-shadow:0 4px 16px rgba(0,0,0,0.06); }
+  .job-card.featured { border-color:#e8d49a; }
+  .job-card.featured::before {
+    content:''; position:absolute;top:0;left:0;right:0;height:2px;
+    background:linear-gradient(90deg,var(--gold),#f5d78a);
+  }
+  .job-header { display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:10px; }
+  .job-title { font-family:var(--display);font-size:15px;font-weight:700;margin-bottom:2px; }
+  .job-venue { font-size:12px;color:var(--muted); }
+  .job-match {
+    font-family:var(--mono);font-size:11px;font-weight:500;
+    color:var(--gold2);background:var(--gold-light);
+    border:1px solid #e8d49a;padding:3px 10px;border-radius:20px;
+    flex-shrink:0;
+  }
+  .job-tags { display:flex;flex-wrap:wrap;gap:6px;margin-top:10px; }
+  .tag {
+    font-family:var(--mono);font-size:9px;
+    padding:3px 9px;border-radius:4px;
+    border:1px solid var(--border);color:var(--ink2);
+    background:var(--surface2);
+  }
+  .tag.teal { color:var(--teal);background:var(--teal-light);border-color:#c0ddd8; }
+  .job-footer { display:flex;align-items:center;justify-content:space-between;margin-top:12px;padding-top:12px;border-top:1px solid var(--border); }
+  .job-salary { font-family:var(--display);font-size:14px;font-weight:700;color:var(--teal); }
+  .job-loc { font-size:11px;color:var(--muted); }
+
+  /* AI CONCIERGE */
+  .chat-window {
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:12px;overflow:hidden;
+  }
+  .chat-header {
+    padding:16px 20px;
+    background:var(--ink);
+    display:flex;align-items:center;gap:12px;
+  }
+  .chat-avatar {
+    width:34px;height:34px;border-radius:50%;
+    background:linear-gradient(135deg,var(--gold),#f5d78a);
+    display:flex;align-items:center;justify-content:center;
+    font-size:14px;font-weight:800;font-family:var(--display);
+    color:var(--ink);flex-shrink:0;
+  }
+  .chat-name { font-family:var(--display);font-size:14px;font-weight:700;color:#fff; }
+  .chat-status { font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.35);margin-top:1px; }
+  .chat-body { padding:20px;height:320px;overflow-y:auto;display:flex;flex-direction:column;gap:12px; }
+  .msg { max-width:78%;display:flex;flex-direction:column;gap:4px; }
+  .msg.ai { align-self:flex-start; }
+  .msg.user { align-self:flex-end; }
+  .msg-bubble {
+    padding:11px 14px;border-radius:12px;
+    font-size:13px;line-height:1.55;
+  }
+  .msg.ai .msg-bubble {
+    background:var(--surface2);border:1px solid var(--border);
+    border-bottom-left-radius:3px;color:var(--ink);
+  }
+  .msg.user .msg-bubble {
+    background:var(--ink);color:#fff;
+    border-bottom-right-radius:3px;
+  }
+  .msg-time { font-family:var(--mono);font-size:9px;color:var(--muted); }
+  .msg.user .msg-time { text-align:right; }
+
+  .match-result {
+    background:var(--gold-light);border:1px solid #e8d49a;
+    border-radius:8px;padding:10px 12px;margin-top:6px;
+  }
+  .match-row { display:flex;align-items:center;justify-content:space-between;padding:4px 0; }
+  .match-job { font-size:12px;font-weight:500; }
+  .match-score {
+    font-family:var(--mono);font-size:11px;
+    color:var(--gold2);font-weight:500;
+  }
+  .match-bar { height:3px;background:var(--border);border-radius:2px;margin-top:2px; }
+  .match-fill { height:3px;background:var(--gold);border-radius:2px; }
+
+  .chat-input {
+    display:flex;gap:0;
+    border-top:1px solid var(--border);
+  }
+  .chat-input input {
+    flex:1;padding:14px 16px;
+    background:transparent;border:none;outline:none;
+    font-family:var(--body);font-size:13px;color:var(--ink);
+  }
+  .chat-send {
+    padding:12px 18px;background:var(--ink);color:#fff;
+    border:none;cursor:pointer;font-family:var(--mono);font-size:11px;
+    transition:background 0.15s;
+  }
+  .chat-send:hover { background:var(--ink2); }
+
+  /* SCHEMA */
+  .schema-table {
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:10px;overflow:hidden;
+  }
+  .schema-header {
+    padding:12px 16px;
+    background:var(--ink);
+    display:flex;align-items:center;gap:8px;
+  }
+  .schema-name { font-family:var(--mono);font-size:12px;font-weight:500;color:var(--gold); }
+  .schema-count { font-family:var(--mono);font-size:9px;color:rgba(255,255,255,0.25); }
+  .schema-fields { padding:4px 0; }
+  .field-row { display:flex;align-items:center;gap:0;padding:6px 16px; }
+  .field-row:not(:last-child) { border-bottom:1px solid var(--border); }
+  .field-name { font-family:var(--mono);font-size:11px;color:var(--ink);flex:1; }
+  .field-type { font-family:var(--mono);font-size:10px;color:var(--teal);width:90px; }
+  .field-note { font-family:var(--mono);font-size:9px;color:var(--muted); }
+  .pk { color:var(--gold2); }
+
+  /* API */
+  .endpoint {
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:8px;padding:14px 16px;margin-bottom:8px;
+    display:flex;align-items:flex-start;gap:12px;
+  }
+  .method {
+    font-family:var(--mono);font-size:10px;font-weight:500;
+    padding:3px 8px;border-radius:4px;flex-shrink:0;margin-top:1px;
+    min-width:46px;text-align:center;
+  }
+  .method.get { background:#e8f2f0;color:var(--teal);border:1px solid #c0ddd8; }
+  .method.post { background:var(--gold-light);color:var(--gold2);border:1px solid #e8d49a; }
+  .method.put { background:#f0e8f2;color:#7a4c9a;border:1px solid #d4b8e0; }
+  .method.del { background:#fce8e8;color:var(--red);border:1px solid #f0c0c0; }
+  .endpoint-path { font-family:var(--mono);font-size:12px;color:var(--ink);font-weight:500;margin-bottom:3px; }
+  .endpoint-desc { font-size:12px;color:var(--muted); }
+
+  .code {
+    background:var(--ink);border-radius:8px;padding:16px 18px;
+    font-family:var(--mono);font-size:11px;line-height:1.7;
+    overflow-x:auto;margin-top:12px;
+  }
+  .c-comment { color:rgba(255,255,255,0.25); }
+  .c-key { color:#79c0ff; }
+  .c-str { color:#f5d78a; }
+  .c-fn { color:#7ee787; }
+  .c-kw { color:#ff79c6; }
+  .c-type { color:#ffa657; }
+
+  /* TRAINING */
+  .course-card {
+    background:var(--surface);border:1px solid var(--border);
+    border-radius:10px;padding:18px 20px;
+    position:relative;overflow:hidden;
+  }
+  .course-card::after {
+    content:'';position:absolute;bottom:0;left:0;right:0;height:3px;
+    background:var(--border);
+  }
+  .course-card .progress-fill {
+    position:absolute;bottom:0;left:0;height:3px;
+    background:linear-gradient(90deg,var(--gold),#f5d78a);
+    transition:width 0.5s ease;
+  }
+  .course-icon { font-size:22px;margin-bottom:10px; }
+  .course-title { font-family:var(--display);font-size:13px;font-weight:700;margin-bottom:4px; }
+  .course-meta { font-size:11px;color:var(--muted);margin-bottom:10px; }
+  .course-footer { display:flex;align-items:center;justify-content:space-between; }
+  .course-pct { font-family:var(--mono);font-size:11px;color:var(--gold2); }
+
+  /* ARCH DIAGRAM */
+  .arch-row { display:flex;align-items:stretch;gap:0;margin-bottom:10px; }
+  .arch-box {
+    flex:1;padding:14px 16px;
+    background:var(--surface);border:1px solid var(--border);
+    position:relative;
+  }
+  .arch-box:first-child { border-radius:8px 0 0 8px; }
+  .arch-box:last-child { border-radius:0 8px 8px 0; }
+  .arch-box:not(:last-child) { border-right:none; }
+  .arch-arrow {
+    display:flex;align-items:center;justify-content:center;
+    width:32px;flex-shrink:0;
+    color:var(--border2);font-size:18px;
+    background:var(--surface2);border-top:1px solid var(--border);border-bottom:1px solid var(--border);
+  }
+  .arch-layer-label { font-family:var(--mono);font-size:8px;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px; }
+  .arch-tech { font-family:var(--display);font-size:13px;font-weight:700; }
+  .arch-sub { font-size:11px;color:var(--muted);margin-top:2px; }
+  .divider { height:1px;background:var(--border);margin:20px 0; }
+</style>
+</head>
+<body>
+<div class="shell">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="brand">
+    <div class="brand-name">MAJC<span class="brand-star">✦</span></div>
+    <div class="brand-sub">Hospitality OS — Demo</div>
+  </div>
+  <div class="nav">
+    <div class="nav-section">Platform</div>
+    <div class="nav-item active" onclick="show('marketplace',this)">
+      <span class="nav-icon">◈</span> Job Marketplace
+    </div>
+    <div class="nav-item" onclick="show('concierge',this)">
+      <span class="nav-icon">◎</span> AI Concierge
+    </div>
+    <div class="nav-item" onclick="show('training',this)">
+      <span class="nav-icon">◻</span> Learning Academy
+    </div>
+    <div class="nav-section">Engineering</div>
+    <div class="nav-item" onclick="show('schema',this)">
+      <span class="nav-icon">▦</span> Database Schema
+    </div>
+    <div class="nav-item" onclick="show('api',this)">
+      <span class="nav-icon">⟁</span> API Layer
+    </div>
+    <div class="nav-item" onclick="show('architecture',this)">
+      <span class="nav-icon">⬡</span> Architecture
+    </div>
+  </div>
+  <div class="sidebar-bottom">
+    <div class="stack-badge">
+      <span class="stk">TypeScript</span>
+      <span class="stk">Expo</span>
+      <span class="stk">Hono</span>
+      <span class="stk">Drizzle</span>
+      <span class="stk">Neon</span>
+      <span class="stk">CF Workers</span>
+      <span class="stk">RTK Query</span>
+      <span class="stk">OpenRouter</span>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- MARKETPLACE -->
+  <section id="marketplace" class="section active">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title">Job Marketplace</div>
+        <div class="topbar-sub">AI-matched hospitality roles across operators</div>
+      </div>
+      <div class="topbar-right">
+        <span class="pill gold">48 open roles</span>
+        <span class="pill teal">AI matching on</span>
+      </div>
+    </div>
+    <div class="body">
+      <div class="grid-4" style="margin-bottom:20px;">
+        <div class="stat">
+          <div class="stat-l">Active Roles</div>
+          <div class="stat-n gold">48</div>
+          <div class="stat-s">+12 this week</div>
+        </div>
+        <div class="stat">
+          <div class="stat-l">Operators</div>
+          <div class="stat-n">214</div>
+          <div class="stat-s">NYC, LA, Miami, Chicago</div>
+        </div>
+        <div class="stat">
+          <div class="stat-l">Avg Match Score</div>
+          <div class="stat-n teal">87%</div>
+          <div class="stat-s">Gemini Flash matching</div>
+        </div>
+        <div class="stat">
+          <div class="stat-l">Applications</div>
+          <div class="stat-n">1,204</div>
+          <div class="stat-s">This month</div>
+        </div>
+      </div>
+
+      <div class="grid-2">
+        <div class="job-card featured">
+          <div class="job-header">
+            <div>
+              <div class="job-title">Restaurant General Manager</div>
+              <div class="job-venue">Nobu Hospitality Group · New York, NY</div>
+            </div>
+            <div class="job-match">96% match</div>
+          </div>
+          <div class="job-tags">
+            <span class="tag teal">Full-time</span>
+            <span class="tag">Fine Dining</span>
+            <span class="tag">5+ yrs</span>
+            <span class="tag">P&L Ownership</span>
+          </div>
+          <div class="job-footer">
+            <div class="job-salary">$95K – $115K</div>
+            <div class="job-loc">Posted 2 hours ago</div>
+          </div>
+        </div>
+
+        <div class="job-card featured">
+          <div class="job-header">
+            <div>
+              <div class="job-title">Bar Manager</div>
+              <div class="job-venue">Soho House · Chicago, IL</div>
+            </div>
+            <div class="job-match">91% match</div>
+          </div>
+          <div class="job-tags">
+            <span class="tag teal">Full-time</span>
+            <span class="tag">Cocktail Program</span>
+            <span class="tag">Team Lead</span>
+          </div>
+          <div class="job-footer">
+            <div class="job-salary">$65K – $80K</div>
+            <div class="job-loc">Posted 5 hours ago</div>
+          </div>
+        </div>
+
+        <div class="job-card">
+          <div class="job-header">
+            <div>
+              <div class="job-title">Executive Sous Chef</div>
+              <div class="job-venue">Four Seasons · Miami, FL</div>
+            </div>
+            <div class="job-match">88% match</div>
+          </div>
+          <div class="job-tags">
+            <span class="tag teal">Full-time</span>
+            <span class="tag">Luxury</span>
+            <span class="tag">Menu Dev</span>
+          </div>
+          <div class="job-footer">
+            <div class="job-salary">$80K – $100K</div>
+            <div class="job-loc">Posted 1 day ago</div>
+          </div>
+        </div>
+
+        <div class="job-card">
+          <div class="job-header">
+            <div>
+              <div class="job-title">Front of House Supervisor</div>
+              <div class="job-venue">Eataly · Los Angeles, CA</div>
+            </div>
+            <div class="job-match">82% match</div>
+          </div>
+          <div class="job-tags">
+            <span class="tag teal">Full-time</span>
+            <span class="tag">Fast-casual</span>
+            <span class="tag">Scheduling</span>
+          </div>
+          <div class="job-footer">
+            <div class="job-salary">$52K – $62K</div>
+            <div class="job-loc">Posted 2 days ago</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- AI CONCIERGE -->
+  <section id="concierge" class="section">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title">AI Concierge</div>
+        <div class="topbar-sub">Powered by OpenRouter / Gemini Flash via Cloudflare Worker</div>
+      </div>
+      <div class="topbar-right">
+        <span class="pill teal">Model: gemini-flash</span>
+        <span class="pill">POST /api/match</span>
+      </div>
+    </div>
+    <div class="body">
+      <div class="grid-2">
+        <div>
+          <div class="chat-window">
+            <div class="chat-header">
+              <div class="chat-avatar">M</div>
+              <div>
+                <div class="chat-name">MAJC Concierge</div>
+                <div class="chat-status">AI matching · Gemini Flash · edge runtime</div>
+              </div>
+            </div>
+            <div class="chat-body" id="chatbody">
+              <div class="msg ai">
+                <div class="msg-bubble">Welcome back. Tell me about your experience and I will find the best-matched roles across our operator network.</div>
+                <div class="msg-time">09:00 AM</div>
+              </div>
+              <div class="msg user">
+                <div class="msg-bubble">I have 6 years bartending, cocktail program experience, and managed a team of 8 at a Michelin-starred venue in NYC.</div>
+                <div class="msg-time">09:01 AM</div>
+              </div>
+              <div class="msg ai">
+                <div class="msg-bubble">Analyzing your profile against 48 active roles...</div>
+                <div class="msg-time">09:01 AM</div>
+              </div>
+              <div class="msg ai">
+                <div class="msg-bubble">
+                  Top matches for your profile:
+                  <div class="match-result">
+                    <div class="match-row"><span class="match-job">Bar Manager · Soho House Chicago</span><span class="match-score">91%</span></div>
+                    <div class="match-bar"><div class="match-fill" style="width:91%"></div></div>
+                    <div class="match-row" style="margin-top:8px;"><span class="match-job">Beverage Director · Ace Hotel NYC</span><span class="match-score">87%</span></div>
+                    <div class="match-bar"><div class="match-fill" style="width:87%"></div></div>
+                    <div class="match-row" style="margin-top:8px;"><span class="match-job">Head Bartender · NoMad LA</span><span class="match-score">84%</span></div>
+                    <div class="match-bar"><div class="match-fill" style="width:84%"></div></div>
+                  </div>
+                </div>
+                <div class="msg-time">09:01 AM</div>
+              </div>
+            </div>
+            <div class="chat-input">
+              <input id="chatInput" type="text" placeholder="Describe your experience or ask about a role..." />
+              <button class="chat-send" onclick="sendMsg()">Send</button>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <div class="card" style="margin-bottom:14px;">
+            <div class="card-label">Matching API — Cloudflare Worker</div>
+            <div class="code">
+<span class="c-comment">// apps/api/src/routes/match.ts</span>
+<span class="c-kw">import</span> { <span class="c-type">Hono</span> } <span class="c-kw">from</span> <span class="c-str">'hono'</span>
+<span class="c-kw">import</span> { db } <span class="c-kw">from</span> <span class="c-str">'../db'</span>
+<span class="c-kw">import</span> { <span class="c-type">aiMatch</span> } <span class="c-kw">from</span> <span class="c-str">'../ai/matcher'</span>
+
+app.<span class="c-fn">post</span>(<span class="c-str">'/match'</span>, <span class="c-kw">async</span> (c) => {
+  <span class="c-kw">const</span> { userSkills, userId } = <span class="c-kw">await</span> c.req.<span class="c-fn">json</span>()
+
+  <span class="c-kw">const</span> jobs = <span class="c-kw">await</span> db.<span class="c-fn">select</span>()
+    .<span class="c-fn">from</span>(jobsTable)
+    .<span class="c-fn">where</span>(eq(jobsTable.status, <span class="c-str">'active'</span>))
+
+  <span class="c-kw">const</span> matches = <span class="c-kw">await</span> <span class="c-fn">aiMatch</span>(userSkills, jobs)
+
+  <span class="c-kw">await</span> db.<span class="c-fn">insert</span>(aiMatchesTable)
+    .<span class="c-fn">values</span>({ userId, results: matches })
+
+  <span class="c-kw">return</span> c.<span class="c-fn">json</span>({ matches })
+})
+            </div>
+          </div>
+          <div class="card">
+            <div class="card-label">AI Matcher — OpenRouter / Gemini Flash</div>
+            <div class="code">
+<span class="c-comment">// packages/ai/src/matcher.ts</span>
+<span class="c-kw">export async function</span> <span class="c-fn">aiMatch</span>(
+  skills: <span class="c-type">string[]</span>, jobs: <span class="c-type">Job[]</span>
+): <span class="c-type">Promise&lt;Match[]&gt;</span> {
+
+  <span class="c-kw">const</span> prompt = <span class="c-str">`
+    Match this hospitality professional
+    Skills: ${skills.join(', ')}
+    Jobs: ${JSON.stringify(jobs.map(j => j.title))}
+    Return ranked JSON: [{jobId, score, reason}]
+  `</span>
+
+  <span class="c-kw">const</span> res = <span class="c-kw">await</span> <span class="c-fn">openrouter</span>({
+    model: <span class="c-str">'google/gemini-flash-1.5'</span>,
+    messages: [{ role: <span class="c-str">'user'</span>, content: prompt }]
+  })
+
+  <span class="c-kw">return</span> <span class="c-type">JSON</span>.<span class="c-fn">parse</span>(res.choices[<span class="c-str">0</span>].message.content)
+}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- TRAINING -->
+  <section id="training" class="section">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title">Learning Academy</div>
+        <div class="topbar-sub">Interactive modules, SCORM packages, and certification tracking</div>
+      </div>
+      <div class="topbar-right">
+        <span class="pill gold">12 active courses</span>
+        <span class="pill teal">4 certifications</span>
+      </div>
+    </div>
+    <div class="body">
+      <div class="grid-3">
+        <div class="course-card">
+          <div class="course-icon">🍷</div>
+          <div class="course-title">Advanced Wine Service</div>
+          <div class="course-meta">WSET Level 2 · 6 modules · 4.5 hrs</div>
+          <div class="course-footer">
+            <span class="tag teal">Required for Sommelier roles</span>
+            <span class="course-pct">78%</span>
+          </div>
+          <div class="progress-fill" style="width:78%"></div>
+        </div>
+        <div class="course-card">
+          <div class="course-icon">🔥</div>
+          <div class="course-title">Kitchen Safety & HACCP</div>
+          <div class="course-meta">ServSafe · 4 modules · 2 hrs</div>
+          <div class="course-footer">
+            <span class="tag teal">Required for BOH roles</span>
+            <span class="course-pct">100%</span>
+          </div>
+          <div class="progress-fill" style="width:100%"></div>
+        </div>
+        <div class="course-card">
+          <div class="course-icon">🏨</div>
+          <div class="course-title">Luxury Guest Experience</div>
+          <div class="course-meta">Forbes Travel · 5 modules · 3 hrs</div>
+          <div class="course-footer">
+            <span class="tag teal">Required for 5-star hotel roles</span>
+            <span class="course-pct">42%</span>
+          </div>
+          <div class="progress-fill" style="width:42%"></div>
+        </div>
+        <div class="course-card">
+          <div class="course-icon">🍸</div>
+          <div class="course-title">Cocktail Program Design</div>
+          <div class="course-meta">MAJC Academy · 8 modules · 5 hrs</div>
+          <div class="course-footer">
+            <span class="tag teal">Recommended for Bar Manager</span>
+            <span class="course-pct">15%</span>
+          </div>
+          <div class="progress-fill" style="width:15%"></div>
+        </div>
+        <div class="course-card">
+          <div class="course-icon">📊</div>
+          <div class="course-title">Restaurant P&L Fundamentals</div>
+          <div class="course-meta">MAJC Academy · 5 modules · 3.5 hrs</div>
+          <div class="course-footer">
+            <span class="tag teal">Required for GM roles</span>
+            <span class="course-pct">0%</span>
+          </div>
+          <div class="progress-fill" style="width:0%"></div>
+        </div>
+        <div class="course-card">
+          <div class="course-icon">🌍</div>
+          <div class="course-title">Cultural Service Standards</div>
+          <div class="course-meta">MAJC Academy · 3 modules · 2 hrs</div>
+          <div class="course-footer">
+            <span class="tag">General</span>
+            <span class="course-pct">60%</span>
+          </div>
+          <div class="progress-fill" style="width:60%"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SCHEMA -->
+  <section id="schema" class="section">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title">Database Schema</div>
+        <div class="topbar-sub">Drizzle ORM — Neon Postgres — TypeScript end-to-end</div>
+      </div>
+      <div class="topbar-right">
+        <span class="pill">packages/db/schema.ts</span>
+        <span class="pill teal">7 core tables</span>
+      </div>
+    </div>
+    <div class="body">
+      <div class="grid-3">
+        <div class="schema-table">
+          <div class="schema-header"><span class="schema-name">users</span><span class="schema-count">8 fields</span></div>
+          <div class="schema-fields">
+            <div class="field-row"><span class="field-name pk">id</span><span class="field-type">uuid</span><span class="field-note">PK</span></div>
+            <div class="field-row"><span class="field-name">email</span><span class="field-type">text</span><span class="field-note">unique</span></div>
+            <div class="field-row"><span class="field-name">full_name</span><span class="field-type">text</span></div>
+            <div class="field-row"><span class="field-name">role</span><span class="field-type">enum</span><span class="field-note">pro|operator</span></div>
+            <div class="field-row"><span class="field-name">skills</span><span class="field-type">text[]</span></div>
+            <div class="field-row"><span class="field-name">years_exp</span><span class="field-type">integer</span></div>
+            <div class="field-row"><span class="field-name">avatar_url</span><span class="field-type">text</span></div>
+            <div class="field-row"><span class="field-name">created_at</span><span class="field-type">timestamp</span></div>
+          </div>
+        </div>
+        <div class="schema-table">
+          <div class="schema-header"><span class="schema-name">jobs</span><span class="schema-count">10 fields</span></div>
+          <div class="schema-fields">
+            <div class="field-row"><span class="field-name pk">id</span><span class="field-type">uuid</span><span class="field-note">PK</span></div>
+            <div class="field-row"><span class="field-name">operator_id</span><span class="field-type">uuid</span><span class="field-note">FK → operators</span></div>
+            <div class="field-row"><span class="field-name">title</span><span class="field-type">text</span></div>
+            <div class="field-row"><span class="field-name">description</span><span class="field-type">text</span></div>
+            <div class="field-row"><span class="field-name">skills_required</span><span class="field-type">text[]</span></div>
+            <div class="field-row"><span class="field-name">salary_min</span><span class="field-type">integer</span></div>
+            <div class="field-row"><span class="field-name">salary_max</span><span class="field-type">integer</span></div>
+            <div class="field-row"><span class="field-name">location</span><span class="field-type">text</span></div>
+            <div class="field-row"><span class="field-name">status</span><span class="field-type">enum</span><span class="field-note">active|closed</span></div>
+            <div class="field-row"><span class="field-name">created_at</span><span class="field-type">timestamp</span></div>
+          </div>
+        </div>
+        <div class="schema-table">
+          <div class="schema-header"><span class="schema-name">ai_matches</span><span class="schema-count">6 fields</span></div>
+          <div class="schema-fields">
+            <div class="field-row"><span class="field-name pk">id</span><span class="field-type">uuid</span><span class="field-note">PK</span></div>
+            <div class="field-row"><span class="field-name">user_id</span><span class="field-type">uuid</span><span class="field-note">FK → users</span></div>
+            <div class="field-row"><span class="field-name">job_id</span><span class="field-type">uuid</span><span class="field-note">FK → jobs</span></div>
+            <div class="field-row"><span class="field-name">score</span><span class="field-type">decimal</span></div>
+            <div class="field-row"><span class="field-name">reasoning</span><span class="field-type">text</span></div>
+            <div class="field-row"><span class="field-name">created_at</span><span class="field-type">timestamp</span></div>
+          </div>
+        </div>
+        <div class="schema-table">
+          <div class="schema-header"><span class="schema-name">operators</span><span class="schema-count">7 fields</span></div>
+          <div class="schema-fields">
+            <div class="field-row"><span class="field-name pk">id</span><span class="field-type">uuid</span><span class="field-note">PK</span></div>
+            <div class="field-row"><span class="field-name">name</span><span class="field-type">text</span></div>
+            <div class="field-row"><span class="field-name">type</span><span class="field-type">enum</span><span class="field-note">restaurant|hotel|bar</span></div>
+            <div class="field-row"><span class="field-name">city</span><span class="field-type">text</span></div>
+            <div class="field-row"><span class="field-name">tier</span><span class="field-type">enum</span><span class="field-note">luxury|casual|fast</span></div>
+            <div class="field-row"><span class="field-name">logo_url</span><span class="field-type">text</span></div>
+            <div class="field-row"><span class="field-name">created_at</span><span class="field-type">timestamp</span></div>
+          </div>
+        </div>
+        <div class="schema-table">
+          <div class="schema-header"><span class="schema-name">training_modules</span><span class="schema-count">7 fields</span></div>
+          <div class="schema-fields">
+            <div class="field-row"><span class="field-name pk">id</span><span class="field-type">uuid</span><span class="field-note">PK</span></div>
+            <div class="field-row"><span class="field-name">title</span><span class="field-type">text</span></div>
+            <div class="field-row"><span class="field-name">provider</span><span class="field-type">text</span></div>
+            <div class="field-row"><span class="field-name">scorm_url</span><span class="field-type">text</span></div>
+            <div class="field-row"><span class="field-name">required_for</span><span class="field-type">text[]</span></div>
+            <div class="field-row"><span class="field-name">duration_hrs</span><span class="field-type">decimal</span></div>
+            <div class="field-row"><span class="field-name">created_at</span><span class="field-type">timestamp</span></div>
+          </div>
+        </div>
+        <div class="schema-table">
+          <div class="schema-header"><span class="schema-name">applications</span><span class="schema-count">6 fields</span></div>
+          <div class="schema-fields">
+            <div class="field-row"><span class="field-name pk">id</span><span class="field-type">uuid</span><span class="field-note">PK</span></div>
+            <div class="field-row"><span class="field-name">user_id</span><span class="field-type">uuid</span><span class="field-note">FK → users</span></div>
+            <div class="field-row"><span class="field-name">job_id</span><span class="field-type">uuid</span><span class="field-note">FK → jobs</span></div>
+            <div class="field-row"><span class="field-name">status</span><span class="field-type">enum</span><span class="field-note">applied|review|offer</span></div>
+            <div class="field-row"><span class="field-name">cover_note</span><span class="field-type">text</span></div>
+            <div class="field-row"><span class="field-name">applied_at</span><span class="field-type">timestamp</span></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- API -->
+  <section id="api" class="section">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title">API Layer</div>
+        <div class="topbar-sub">Cloudflare Workers — Hono framework — Zod validation — edge runtime</div>
+      </div>
+      <div class="topbar-right">
+        <span class="pill">apps/api/src/routes/</span>
+        <span class="pill teal">80+ endpoints</span>
+      </div>
+    </div>
+    <div class="body">
+      <div class="grid-2">
+        <div>
+          <div class="card-label" style="margin-bottom:10px;">Core Endpoints</div>
+          <div class="endpoint">
+            <span class="method get">GET</span>
+            <div><div class="endpoint-path">/api/jobs</div><div class="endpoint-desc">List active jobs with filters, pagination, location</div></div>
+          </div>
+          <div class="endpoint">
+            <span class="method post">POST</span>
+            <div><div class="endpoint-path">/api/jobs</div><div class="endpoint-desc">Operator creates a new job listing with Zod validation</div></div>
+          </div>
+          <div class="endpoint">
+            <span class="method post">POST</span>
+            <div><div class="endpoint-path">/api/match</div><div class="endpoint-desc">AI concierge matches user skills to active jobs via Gemini Flash</div></div>
+          </div>
+          <div class="endpoint">
+            <span class="method post">POST</span>
+            <div><div class="endpoint-path">/api/apply</div><div class="endpoint-desc">Professional submits application with cover note</div></div>
+          </div>
+          <div class="endpoint">
+            <span class="method get">GET</span>
+            <div><div class="endpoint-path">/api/training-modules</div><div class="endpoint-desc">Returns modules with completion status and required job links</div></div>
+          </div>
+          <div class="endpoint">
+            <span class="method get">GET</span>
+            <div><div class="endpoint-path">/api/users/:id/profile</div><div class="endpoint-desc">Full professional profile with skills, matches, certifications</div></div>
+          </div>
+          <div class="endpoint">
+            <span class="method put">PUT</span>
+            <div><div class="endpoint-path">/api/applications/:id</div><div class="endpoint-desc">Operator updates application status to review, offer, declined</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="card-label" style="margin-bottom:10px;">Worker entrypoint — apps/api/src/index.ts</div>
+          <div class="code">
+<span class="c-kw">import</span> { <span class="c-type">Hono</span> } <span class="c-kw">from</span> <span class="c-str">'hono'</span>
+<span class="c-kw">import</span> { <span class="c-fn">zValidator</span> } <span class="c-kw">from</span> <span class="c-str">'@hono/zod-validator'</span>
+<span class="c-kw">import</span> { jobRoutes } <span class="c-kw">from</span> <span class="c-str">'./routes/jobs'</span>
+<span class="c-kw">import</span> { matchRoutes } <span class="c-kw">from</span> <span class="c-str">'./routes/match'</span>
+
+<span class="c-kw">const</span> app = <span class="c-kw">new</span> <span class="c-type">Hono</span>()
+
+app.<span class="c-fn">use</span>(<span class="c-str">'*'</span>, <span class="c-fn">cors</span>())
+app.<span class="c-fn">use</span>(<span class="c-str">'*'</span>, <span class="c-fn">authMiddleware</span>())
+
+app.<span class="c-fn">route</span>(<span class="c-str">'/api/jobs'</span>, jobRoutes)
+app.<span class="c-fn">route</span>(<span class="c-str">'/api/match'</span>, matchRoutes)
+
+<span class="c-kw">export default</span> app
+
+<span class="c-comment">// RTK Query client — packages/shared/api.ts</span>
+<span class="c-kw">export const</span> majcApi = <span class="c-fn">createApi</span>({
+  reducerPath: <span class="c-str">'majcApi'</span>,
+  baseQuery: <span class="c-fn">fetchBaseQuery</span>({
+    baseUrl: <span class="c-str">'https://api.majc.workers.dev'</span>
+  }),
+  endpoints: (builder) => ({
+    getJobs: builder.<span class="c-fn">query</span>&lt;<span class="c-type">Job[]</span>, <span class="c-type">JobFilters</span>&gt;({
+      query: (filters) => <span class="c-str">`/jobs?${qs.stringify(filters)}`</span>
+    }),
+    matchJobs: builder.<span class="c-fn">mutation</span>&lt;<span class="c-type">Match[]</span>, <span class="c-type">SkillsInput</span>&gt;({
+      query: (body) => ({ url: <span class="c-str">'/match'</span>, method: <span class="c-str">'POST'</span>, body })
+    })
+  })
+})
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ARCHITECTURE -->
+  <section id="architecture" class="section">
+    <div class="topbar">
+      <div class="topbar-left">
+        <div class="topbar-title">Architecture</div>
+        <div class="topbar-sub">TypeScript monorepo — edge-first — mobile-ready</div>
+      </div>
+      <div class="topbar-right">
+        <span class="pill">monorepo</span>
+        <span class="pill teal">CF edge runtime</span>
+      </div>
+    </div>
+    <div class="body">
+      <div class="card-label" style="margin-bottom:12px;">Request flow — mobile to edge to database</div>
+      <div class="arch-row">
+        <div class="arch-box">
+          <div class="arch-layer-label">Client</div>
+          <div class="arch-tech">Expo / React Native</div>
+          <div class="arch-sub">Redux Toolkit + RTK Query, Reanimated, Tamagui</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box">
+          <div class="arch-layer-label">Edge API</div>
+          <div class="arch-tech">Cloudflare Workers</div>
+          <div class="arch-sub">Hono framework, Zod validation, auth middleware</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box">
+          <div class="arch-layer-label">AI Layer</div>
+          <div class="arch-tech">OpenRouter</div>
+          <div class="arch-sub">Gemini Flash matching, Replicate image processing</div>
+        </div>
+        <div class="arch-arrow">→</div>
+        <div class="arch-box">
+          <div class="arch-layer-label">Database</div>
+          <div class="arch-tech">Neon Postgres</div>
+          <div class="arch-sub">Drizzle ORM, 48 tables, typed schema end-to-end</div>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="card-label" style="margin-bottom:12px;">Monorepo structure — apps + packages</div>
+      <div class="code">
+<span class="c-comment"># majc-hospitality-ai-platform-demo</span>
+<span class="c-str">apps/</span>
+├── <span class="c-key">mobile/</span>          <span class="c-comment"># Expo SDK 55, React Native 0.83</span>
+│   ├── screens/     <span class="c-comment"># JobFeed, AIConcierge, Training, Profile</span>
+│   └── store/       <span class="c-comment"># Redux Toolkit + RTK Query slices</span>
+├── <span class="c-key">api/</span>             <span class="c-comment"># Cloudflare Worker — Hono</span>
+│   └── src/routes/  <span class="c-comment"># jobs, match, apply, training, users</span>
+
+<span class="c-str">packages/</span>
+├── <span class="c-key">db/</span>              <span class="c-comment"># Drizzle schema — Neon Postgres</span>
+│   └── schema.ts    <span class="c-comment"># users, jobs, operators, matches...</span>
+├── <span class="c-key">ai/</span>              <span class="c-comment"># OpenRouter matching engine</span>
+│   └── matcher.ts   <span class="c-comment"># Gemini Flash skill-to-job ranking</span>
+└── <span class="c-key">types/</span>           <span class="c-comment"># Shared TypeScript types across apps</span>
+
+<span class="c-str">infra/</span>
+├── wrangler.toml    <span class="c-comment"># Cloudflare Worker config</span>
+└── .github/         <span class="c-comment"># GitHub Actions CI/CD + EAS build</span>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="grid-4">
+        <div class="stat">
+          <div class="stat-l">Screens</div>
+          <div class="stat-n gold">25+</div>
+          <div class="stat-s">React Native / Expo</div>
+        </div>
+        <div class="stat">
+          <div class="stat-l">API Endpoints</div>
+          <div class="stat-n teal">80+</div>
+          <div class="stat-s">Cloudflare Workers</div>
+        </div>
+        <div class="stat">
+          <div class="stat-l">DB Tables</div>
+          <div class="stat-n">48</div>
+          <div class="stat-s">Neon Postgres</div>
+        </div>
+        <div class="stat">
+          <div class="stat-l">Runtime</div>
+          <div class="stat-n" style="font-size:20px;">Edge</div>
+          <div class="stat-s">CF Workers — global</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+</main>
+</div>
+
+<script>
+function show(id, el) {
+  document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  el.classList.add('active');
+}
+
+function sendMsg() {
+  const input = document.getElementById('chatInput');
+  const body = document.getElementById('chatbody');
+  const text = input.value.trim();
+  if (!text) return;
+
+  const userMsg = document.createElement('div');
+  userMsg.className = 'msg user';
+  userMsg.innerHTML = `<div class="msg-bubble">${text}</div><div class="msg-time">Just now</div>`;
+  body.appendChild(userMsg);
+  input.value = '';
+
+  setTimeout(() => {
+    const aiMsg = document.createElement('div');
+    aiMsg.className = 'msg ai';
+    aiMsg.innerHTML = `<div class="msg-bubble">Analyzing your query against active roles and your profile... I'll surface the best-matched opportunities from our operator network.</div><div class="msg-time">Just now</div>`;
+    body.appendChild(aiMsg);
+    body.scrollTop = body.scrollHeight;
+  }, 800);
+
+  body.scrollTop = body.scrollHeight;
+}
+
+document.getElementById('chatInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') sendMsg();
+});
+</script>
+</body>
+</html>
