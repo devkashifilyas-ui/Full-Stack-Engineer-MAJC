@@ -149,5 +149,3 @@ open demo/majc-hospitality-demo.html
 ## About
 
 Built as a technical demonstration for the MAJC Full Stack Engineer engagement. The architecture mirrors the production MAJC platform and demonstrates end-to-end TypeScript engineering across mobile, API, AI, and database layers — exactly the scope of the role.
-
-**[Your Name]** — [Upwork Profile](https://upwork.com) · [GitHub](https://github.com/devkashifilyas-ui) · [Email](mailto:you@email.com)
